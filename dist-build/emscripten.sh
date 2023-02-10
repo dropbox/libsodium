@@ -9,7 +9,6 @@ export MAX_MEMORY_SUMO=16777216
 export MAX_MEMORY_TESTS=16777216
 export LDFLAGS="-s RESERVED_FUNCTION_POINTERS=8"
 export LDFLAGS="${LDFLAGS} -s ALLOW_MEMORY_GROWTH=1"
-export LDFLAGS="${LDFLAGS} -s SINGLE_FILE=1"
 export LDFLAGS="${LDFLAGS} -s ASSERTIONS=0"
 export LDFLAGS="${LDFLAGS} -s AGGRESSIVE_VARIABLE_ELIMINATION=1 -s ALIASING_FUNCTION_POINTERS=1"
 export LDFLAGS="${LDFLAGS} -s DISABLE_EXCEPTION_CATCHING=1"
@@ -134,16 +133,18 @@ if [ "$DIST" = yes ]; then
             resolve();
           };
 
-          $(cat "${PREFIX}/lib/libsodium.asm.tmp.js" | sed 's|use asm||g')
+          $(cat "${PREFIX}/lib/libsodium.asm.tmp.js" | sed 's|use asm||g; s|libsodium.asm.tmp|libsodium|g')
         });
       };
-      $(cat "${PREFIX}/lib/libsodium.wasm.tmp.js")
+      $(cat "${PREFIX}/lib/libsodium.wasm.tmp.js" | sed 's|libsodium.wasm.tmp|libsodium|g')
     }).catch(function() {
       return _Module.useBackupModule();
     });
 EOM
 
   rm "${PREFIX}/lib/libsodium.asm.tmp.js" "${PREFIX}/lib/libsodium.wasm.tmp.js"
+  mv "${PREFIX}/lib/libsodium.asm.tmp.js.mem" "${PREFIX}/lib/libsodium.js.mem"
+  mv "${PREFIX}/lib/libsodium.wasm.tmp.wasm" "${PREFIX}/lib/libsodium.wasm"
   touch -r "${PREFIX}/lib/libsodium.js" "$DONE_FILE"
   ls -l "${PREFIX}/lib/libsodium.js"
   exit 0
